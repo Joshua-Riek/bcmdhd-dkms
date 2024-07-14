@@ -1,0 +1,40 @@
+Source: bcmdhd-dkms
+Maintainer: Joshua Riek <jjriek@verizon.net>
+Section: misc
+Priority: optional
+Standards-Version: 4.6.0
+Build-Depends: debhelper (>=12~),
+               devscripts,
+               dh-exec,
+               dh-sequence-dkms,
+               lintian
+
+Package: bcmdhd-sdio-dkms
+Architecture: arm64
+Section: misc
+Priority: optional
+Depends: ${misc:Depends}, rockchip-firmware
+Conflicts: bcmdhd-pcie-dkms, bcmdhd-usb-dkms
+Description: dkms sources for Broadcom ap6xxx SDIO
+ This package provides the dkms source code for Broadcom
+ ap6xxx SDIO.
+
+Package: bcmdhd-pcie-dkms
+Architecture: arm64
+Section: misc
+Priority: optional
+Depends: ${misc:Depends}, rockchip-firmware
+Conflicts: bcmdhd-sdio-dkms, bcmdhd-usb-dkms
+Description: dkms sources for Broadcom ap6xxx PCIe
+ This package provides the dkms source code for Broadcom
+ ap6xxx PCIe.
+
+Package: bcmdhd-usb-dkms
+Architecture: arm64
+Section: misc
+Priority: optional
+Depends: ${misc:Depends}, rockchip-firmware
+Conflicts: bcmdhd-sdio-dkms, bcmdhd-pcie-dkms
+Description: dkms sources for Broadcom ap6xxx USB
+ This package provides the dkms source code for Broadcom
+ ap6xxx USB.
