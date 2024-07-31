@@ -1,0 +1,5 @@
+bcmdhd (101.10.591.52.27-1) jammy; urgency=medium
+
+  * Initial release.
+
+ -- Joshua Riek <jjriek@verizon.net>  Wed, 31 Jul 2024 16:09:29 -0400

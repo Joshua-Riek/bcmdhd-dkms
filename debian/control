@@ -1,4 +1,4 @@
-Source: bcmdhd-dkms
+Source: bcmdhd
 Maintainer: Joshua Riek <jjriek@verizon.net>
 Section: misc
 Priority: optional
