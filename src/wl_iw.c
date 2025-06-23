@@ -4180,7 +4180,11 @@ _iscan_sysioc_thread(void *data)
 	status = WL_SCAN_RESULTS_PARTIAL;
 	while (down_interruptible(&iscan->sysioc_sem) == 0) {
 		if (iscan->timer_on) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 15, 0))
 			del_timer(&iscan->timer);
+#else
+			del_timer_sync(&iscan->timer);
+#endif
 			iscan->timer_on = 0;
 		}
 

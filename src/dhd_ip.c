@@ -459,7 +459,7 @@ int dhd_tcpack_suppress_set(dhd_pub_t *dhdp, uint8 mode)
 						tcpack_info_t *tcpack_info_tbl =
 							&tcpack_sup_module->tcpack_info_tbl[i];
 #ifndef TCPACK_SUPPRESS_HOLD_HRT
-						del_timer(&tcpack_info_tbl->timer);
+						del_timer_sync(&tcpack_info_tbl->timer);
 #else
 						hrtimer_cancel(&tcpack_info_tbl->timer.timer);
 #endif /* TCPACK_SUPPRESS_HOLD_HRT */

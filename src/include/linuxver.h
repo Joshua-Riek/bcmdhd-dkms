@@ -201,7 +201,7 @@ typedef irqreturn_t(*FN_ISR) (int irq, void *dev_id, struct pt_regs *ptregs);
 #include <uapi/linux/sched/types.h>
 #endif /* LINUX_VERS >= 4.11.0 */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)
 #include <net/lib80211.h>
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
@@ -382,13 +382,13 @@ extern void pci_unmap_single(void *dev, uint pa, uint size, int direction);
 typedef struct timer_list timer_list_compat_t;
 
 #define init_timer_compat(timer_compat, cb, priv) \
-	init_timer(timer_compat); \
-	(timer_compat)->data = (ulong)priv; \
-	(timer_compat)->function = cb
+init_timer(timer_compat); \
+(timer_compat)->data = (ulong)priv; \
+(timer_compat)->function = cb
 #define timer_set_private(timer_compat, priv) (timer_compat)->data = (ulong)priv
 #define timer_expires(timer_compat) (timer_compat)->expires
 
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0) */
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0) /* LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0) */
 
 typedef struct timer_list_compat {
 	struct timer_list timer;
@@ -399,9 +399,9 @@ typedef struct timer_list_compat {
 extern void timer_cb_compat(struct timer_list *tl);
 
 #define init_timer_compat(timer_compat, cb, priv) \
-	(timer_compat)->arg = priv; \
-	(timer_compat)->callback = cb; \
-	timer_setup(&(timer_compat)->timer, timer_cb_compat, 0);
+(timer_compat)->arg = priv; \
+(timer_compat)->callback = cb; \
+timer_setup(&(timer_compat)->timer, timer_cb_compat, 0);
 #define timer_set_private(timer_compat, priv) (timer_compat)->arg = priv
 #define timer_expires(timer_compat) (timer_compat)->timer.expires
 
@@ -412,7 +412,32 @@ extern void timer_cb_compat(struct timer_list *tl);
 #define timer_pending(t) timer_pending(&((t)->timer))
 #define add_timer(t) add_timer(&((t)->timer))
 #define mod_timer(t, j) mod_timer(&((t)->timer), j)
+#else
+
+typedef struct timer_list_compat {
+	struct timer_list timer;
+	void *arg;
+	void (*callback)(ulong arg);
+} timer_list_compat_t;
+
+extern void timer_cb_compat(struct timer_list *tl);
+
+#define init_timer_compat(timer_compat, cb, priv) \
+(timer_compat)->arg = priv; \
+(timer_compat)->callback = cb; \
+timer_setup(&(timer_compat)->timer, timer_cb_compat, 0);
+#define timer_set_private(timer_compat, priv) (timer_compat)->arg = priv
+#define timer_expires(timer_compat) (timer_compat)->timer.expires
+
+#ifndef del_timer_sync
+#define del_timer_sync(t) timer_delete_sync(&((t)->timer))
+#endif
+#define timer_pending(t) timer_pending(&((t)->timer))
+#define add_timer(t) add_timer(&((t)->timer))
+#define mod_timer(t, j) mod_timer(&((t)->timer), j)
+
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0) */
+
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
 #define rtc_time_to_tm(a, b) rtc_time64_to_tm(a, b)
@@ -978,9 +1003,11 @@ static inline struct inode *file_inode(const struct file *f)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
 // New google android GKI not allow kernel_write/kernel_read, and use
 // below for temporary overcome, and waiting for get rid of that for future
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
+#if (defined(MODULE_IMPORT_NS) && LINUX_VERSION_CODE >= KERNEL_VERSION(6, 13, 0))
+MODULE_IMPORT_NS("VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver");
+#elif (defined(MODULE_IMPORT_NS) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
 MODULE_IMPORT_NS(VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver);
-#endif // LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
+#endif
 #define vfs_write(fp, buf, len, pos) kernel_write(fp, buf, len, pos)
 #define vfs_read(fp, buf, len, pos) kernel_read(fp, buf, len, pos)
 int kernel_read_compat(struct file *file, loff_t offset, char *addr, unsigned long count);

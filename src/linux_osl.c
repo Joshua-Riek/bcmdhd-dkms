@@ -2000,7 +2000,11 @@ osl_timer_del(osl_t *osh, osl_timer_t *t)
 	if (t->set) {
 		t->set = FALSE;
 		if (t->timer) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 15, 0))
 			del_timer(t->timer);
+#else
+			del_timer_sync(t->timer);
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(6, 15, 0) */
 			MFREE(NULL, t->timer, sizeof(timer_list_compat_t));
 		}
 #ifdef BCMDBG
